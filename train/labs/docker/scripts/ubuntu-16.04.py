@@ -3,44 +3,50 @@
 
 import os
 import sys
+import re
 
 
 import requests
 
 
 # helper functions
+def parse_version(version):
+    """Parse and normalize version"""
+    m = re.match(r'\d{2}\.\d{2}\.\d+(?:-ce)?(?:-(?:beta|rc)\d+)?', version)
+    if m:
+        return version
+    print 'Unable to parse specified version (format=XX.YY.Z[-ce][-(beta|rc)N]).'
+    return None
+
+
 def check_url(path, version):
     """Check for valid URL"""
-    print 'Checking URL: https://{0}/docker-{1}'.format(path, version)
-    return 'https://{0}/docker-{1}'.format(path, version)
+    print 'Checking URL: https://{0}/docker-{1}.tgz'.format(path, version)
+    return 'https://{0}/docker-{1}.tgz'.format(path, version)
 
 
-def get_txt(path, version):
+def get_txt(version, channel):
     """Custom Docker install text"""
-    txt = 'curl -sSL https://get.docker.com/ | sh\n'.format(path) + \
-          'mv /usr/bin/docker /usr/bin/docker.org\n' + \
-          'wget https://{0}/docker-{1} -O /usr/bin/docker\n'.format(path, version) + \
-          'chmod +x /usr/bin/docker\n'
+    txt = 'export VERSION={0} CHANNEL={1} && curl -sSL https://get.docker.com/ | sh\n'.format(version, channel)
     return txt
 
 
 def get_custom(prompt):
     """Prompt for custom Docker version"""
 
-    version = raw_input(prompt)
-    if 'rc' in version:
-        path = 'test.docker.com/builds/Linux/x86_64'
-    elif 'dev' in version:
-        path = 'master.dockerproject.org/linux/amd64'
-    else:
-        path = 'get.docker.com/builds/Linux/x86_64'
+    version = None
+    while not version:
+        version = parse_version(raw_input(prompt))
+        prompt = '\nEnter a different version: '
 
+    channel = 'test'
+    path = 'download.docker.com/linux/static/{0}/x86_64'.format(channel)
     r = requests.head(check_url(path, version))
     if r.status_code != 200:
         print 'Unable to locate specified version.'
         txt = get_custom('\nEnter a different version: ')
     else:
-        txt = get_txt(path, version)
+        txt = get_txt(version, channel)
 
     return txt
 
@@ -50,35 +56,28 @@ os.system('clear')
 docker = raw_input("""
 Which version of Docker do you want to install?
 
-  - latest (default)
-  - cs
-  - rc
+  - stable [default]
+  - rc (test)
   - experimental (nightly)
-  - master (github master branch)
+  - edge [deprecated]
   - custom
 
 Enter version (Press enter for default): """)
 
 # example urls
-#https://get.docker.com/builds/Linux/x86_64/docker-latest
-#https://test.docker.com/builds/Linux/x86_64/docker-1.6.0-rc6
-#https://master.dockerproject.com/linux/amd64/docker-1.5.0-dev
+#https://download.docker.com/linux/static/nightly/x86_64/docker-18.06.0-ce-dev.tgz
+#https://download.docker.com/linux/static/test/x86_64/docker-18.05.0-ce-rc1.tgz
+#https://download.docker.com/linux/static/edge/x86_64/docker-18.05.0-ce.tgz
 
 docker = docker.lower()
-if docker == '' or docker =='latest':
+if docker == '' or docker == 'stable':
     txt = 'curl -sSL https://get.docker.com/ | sh'
-elif docker == 'cs':
-    txt = "curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | apt-key add --import\n" + \
-          'echo "deb https://packages.docker.com/1.13/apt/repo ubuntu-xenial main" | tee /etc/apt/sources.list.d/docker.list\n' + \
-          'apt-get update && apt-get install -y docker-engine\n'
-
 elif docker == 'rc':
-    txt = 'curl -faSL https://test.docker.com/ | sh'
+    txt = 'export CHANNEL=test && curl -sSL https://get.docker.com/ | sh'
 elif docker == 'experimental':
-    txt = 'curl -fsSL https://experimental.docker.com/ | sh'
-elif docker == 'master':
-    r = requests.get('https://master.dockerproject.org/version')
-    txt = get_txt('master.dockerproject.org/linux/amd64', r.text)
+    txt = 'export CHANNEL=nightly && curl -sSL https://get.docker.com/ | sh'
+elif docker =='edge':
+    txt = 'export CHANNEL=edge && curl -sSL https://get.docker.com/ | sh'
 elif docker == 'custom':
     txt = get_custom('Enter version: ')
 else:
