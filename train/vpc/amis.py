@@ -16,6 +16,7 @@ AP_NORTHEAST_1 = {
     'Ubuntu-14.04': 'ami-5abca75b',
     'Ubuntu-15.10': 'ami-3f3fd75e',
     'Ubuntu-16.04': 'ami-5d38d93c',
+    'Ubuntu-18.04': 'ami-033cdfcdd17e140cc',
 }
 
 AP_SOUTHEAST_1 = {
@@ -29,6 +30,7 @@ AP_SOUTHEAST_1 = {
     'Ubuntu-14.04': 'ami-36c6ec64',
     'Ubuntu-15.10': 'ami-d466b6b7',
     'Ubuntu-16.04': 'ami-a35284c0',
+    'Ubuntu-18.04': 'ami-012e97ef137a3f446',
 }
 
 AP_SOUTHEAST_2 = {
@@ -42,6 +44,7 @@ AP_SOUTHEAST_2 = {
     'Ubuntu-14.04': 'ami-e7eb9fdd',
     'Ubuntu-15.10': 'ami-a9371eca',
     'Ubuntu-16.04': 'ami-f4361997',
+    'Ubuntu-18.04': 'ami-0194dc9305ec865b0',
 }
 
 EU_CENTRAL_1 = {
@@ -53,6 +56,7 @@ EU_CENTRAL_1 = {
     'Ubuntu-14.04': 'ami-4ec4f653',
     'Ubuntu-15.10': 'ami-8ebe57e1',
     'Ubuntu-16.04': 'ami-f9e30f96',
+    'Ubuntu-18.04': 'ami-0332a5c40cf835528',
 }
 
 EU_WEST_1 = {
@@ -66,6 +70,7 @@ EU_WEST_1 = {
     'Ubuntu-14.04': 'ami-f5810f82',
     'Ubuntu-15.10': 'ami-2dbe225e',
     'Ubuntu-16.04': 'ami-7a138709',
+    'Ubuntu-18.04': 'ami-00035f41c82244dab',
 }
 
 SA_EAST_1 = {
@@ -79,6 +84,7 @@ SA_EAST_1 = {
     'Ubuntu-14.04': 'ami-55f14e48',
     'Ubuntu-15.10': 'ami-ced75da2',
     'Ubuntu-16.04': 'ami-0d5dd561',
+    'Ubuntu-18.04': 'ami-0100606acc0bc1ab2',
 }
 
 US_EAST_1 = {
@@ -93,7 +99,8 @@ US_EAST_1 = {
     'Ubuntu-12.04': 'ami-427a392a',
     'Ubuntu-14.04': 'ami-767a391e',
     'Ubuntu-15.10': 'ami-5fbc4632',
-    'Ubuntu-16.04': 'ami-13be557e'
+    'Ubuntu-16.04': 'ami-13be557e',
+    'Ubuntu-18.04': 'ami-012fd5eb46f56731f',
 }
 
 US_WEST_1 = {
@@ -108,6 +115,7 @@ US_WEST_1 = {
     'Ubuntu-14.04': 'ami-8ebba3cb',
     'Ubuntu-15.10': 'ami-610d4801',
     'Ubuntu-16.04': 'ami-84423ae4',
+    'Ubuntu-18.04': 'ami-00683f44399feb91c',
 }
 
 US_WEST_2 = {
@@ -123,4 +131,5 @@ US_WEST_2 = {
     'Ubuntu-15.10': 'ami-0af8026a',
     'Ubuntu-16.04': 'ami-06b94666',
     'JTU-LDAP': 'ami-25f83c45',
+    'Ubuntu-18.04': 'ami-00f13b45242aff065',
 }
