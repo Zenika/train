@@ -7,12 +7,15 @@ WORKDIR /home/train
 
 RUN apt-get update && apt-get install -y \
     git \
+    groff \
+    jq \
     putty-tools \
     sudo \
     tree \
     vim
 
 RUN pip install --upgrade \
+    awscli \
     boto \
     pip \
     requests \
