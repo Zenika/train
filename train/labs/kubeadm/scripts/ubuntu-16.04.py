@@ -44,6 +44,7 @@ def get_custom(prompt):
 
     return txt
 
+kube_version="1.13.3"
 
 # prompts
 os.system('clear')
@@ -92,12 +93,12 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet kubeadm kubectl
+apt-get install -y kubelet={1} kubeadm={1} kubectl={1}
 apt-mark hold kubelet kubeadm kubectl
 
 {{dinfo}}
 reboot
-'''.format(txt)
+'''.format(txt, kube_version)
 
 # Script to use if launching from a custom lab AMI image
 AMIBUILD = '''#!/bin/sh
