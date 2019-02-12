@@ -44,7 +44,7 @@ def get_custom(prompt):
 
     return txt
 
-kube_version="1.13.3"
+kube_version="1.13.3-00"
 
 # prompts
 os.system('clear')
