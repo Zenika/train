@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     vim
 
 RUN pip install --upgrade \
+    ansible \
     awscli \
     boto \
     pip \
