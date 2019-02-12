@@ -76,6 +76,7 @@ apt-get update && apt-get install -y \
     jq \
     linux-image-extra-$(uname -r) \
     linux-image-extra-virtual \
+    python \
     tree
 
 # docker
