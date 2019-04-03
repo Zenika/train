@@ -22,7 +22,7 @@ def prep_file(path, username):
     attachment = MIMEApplication(open(path, 'rb').read())
     attachment.add_header('Content-Disposition',
                           'attachment',
-                          filename='{0}.{1}'.format(username, path.split('.')[1]))
+                          filename='{0}.{1}'.format(username, path.split('.')[-1]))
 
     return(attachment)
 
