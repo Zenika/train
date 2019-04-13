@@ -51,6 +51,14 @@ parser.add_argument('-l',
                     help='List running labs and instances in AWS',
                     action='store_true', required=False)
 
+parser.add_argument('-n',
+                    help='Generate ansible inventory',
+                    action='store_true', required=False)
+
+parser.add_argument('-s', metavar='<user>',
+                    help='Generate ssh config',
+                    required=False)
+
 parser.add_argument('-d', metavar='<tag>',
                     help='Delete a lab from AWS',
                     required=False)
@@ -59,7 +67,7 @@ parser.add_argument('-p',
                     help='Purge/Delete all instances in VPC',
                     action='store_true', required=False)
 
-parser.add_argument('-t', 
+parser.add_argument('-t',
                     help='Terminate environment (VPC and local files)',
                     action='store_true', required=False)
 
@@ -87,6 +95,10 @@ def process():
         print "Create it by running the command: train -v\n"
         sys.exit(1)
 
+    if args.n:
+        labs.inventory(conn, user_vpc)
+    if args.s:
+        labs.ssh_config(conn, user_vpc, args.s)
     if args.x:
         labs.launch_lab(conn, user_vpc, args.x)
     if args.r:
@@ -104,7 +116,7 @@ def process():
 
 
 if __name__ == '__main__':
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 

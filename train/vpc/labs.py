@@ -16,15 +16,17 @@ def _prompt_config(lab, path):
     files.sort()
 
     if len(files) == 1:
-        return {'1': files[0].strip('.py')},'1'
+        return {'1': files[0].strip('.py')}, '1'
     else:
         print "Available configurations for the '{0}' lab:\n".format(lab)
         options = []
         for f in files:
             if f.endswith('.py'):
-                options.append(f.replace('.py',''))
+                options.append(f.replace('.py', ''))
 
-        return util.list_prompt('Which configuration would you like to execute?: ', options)
+        return util.list_prompt(
+            'Which configuration would you like to execute?: ',
+            options)
 
 
 def list_available_labs():
@@ -117,9 +119,9 @@ def lab_info(conn, user_vpc):
 def get_user_instance_info(conn, user_vpc, lab_tag, user):
     """List IP/DNS for each instance for user"""
 
-    reservations = conn.get_all_instances(filters = {'vpc-id': user_vpc.id,
-                                                     'tag:Lab': lab_tag,
-                                                     'tag:User': user})
+    reservations = conn.get_all_instances(filters={'vpc-id': user_vpc.id,
+                                                   'tag:Lab': lab_tag,
+                                                   'tag:User': user})
 
     final = []
     for r in reservations:
@@ -129,35 +131,106 @@ Name:         {0}
   IP:         {1}
   Private IP: {2}
   Public DNS: {3}\n""".format(instance.tags['Name'],
-                                instance.ip_address,
-                                instance.private_ip_address,
-                                instance.public_dns_name))
+                              instance.ip_address,
+                              instance.private_ip_address,
+                              instance.public_dns_name))
     final.sort()
 
     return final
 
 
+def ssh_config_instance(instance, user):
+    if 'Name' not in instance.tags.keys():
+        return ""
+    name = instance.tags['Name']
+    node = "-".join(name.split("-")[1:])
+    tmpl = """
+Host {0}
+     HostName {1}
+     User ubuntu
+     IdentityFile /host/{2}/users/{3}/{3}-{2}.pem"""
+    return tmpl.format(node, instance.ip_address, VPC, user)
+
+
+def ssh_config(conn, user_vpc, user):
+    """Generate ssh_config for user"""
+    reservations = conn.get_all_instances(filters={'vpc-id': user_vpc.id,
+                                                   'tag:User': user})
+    for r in reservations:
+        for instance in r.instances:
+            print ssh_config_instance(instance, user)
+
+
+def instance_to_inventory(instance):
+    if 'User' in instance.tags.keys():
+        tmpl = "{0} tagged=yes private_ip={1} dns_name={2} \
+ansible_ssh_private_key_file=/host/{3}/users/{4}/{4}-{3}.pem\n"
+        return tmpl.format(instance.ip_address,
+                           instance.private_ip_address,
+                           instance.public_dns_name,
+                           VPC,
+                           instance.tags['User'])
+    else:
+        return ""
+
+
+def add_to_dict(instance, aux, tag):
+    if tag not in instance.tags.keys():
+        return
+    aux[instance.tags[tag]] = aux.get(instance.tags[tag], "")
+    + instance_to_inventory(instance)
+
+
+def add_node_to_instance(instance):
+    if 'Name' not in instance.tags.keys():
+        return
+    name = instance.tags['Name']
+    node = "-".join(name.split("-")[1:])
+    instance.tags['Node'] = node
+
+
+def inventory(conn, user_vpc):
+    users = {}
+    nodes = {}
+    labs = {}
+    reservations = conn.get_all_instances(filters={'vpc-id': user_vpc.id})
+    for r in reservations:
+        for instance in r.instances:
+            add_to_dict(instance, users, 'User')
+            add_to_dict(instance, labs, 'Lab')
+            add_node_to_instance(instance)
+            add_to_dict(instance, nodes, 'Node')
+    for k, v in users.iteritems():
+        print("[{0}]\n{1}".format(k, v))
+    for k, v in labs.iteritems():
+        print("[{0}]\n{1}".format(k, v))
+    for k, v in nodes.iteritems():
+        print("[{0}]\n{1}".format(k, v))
+
+
 def get_lab_instance_info(conn, user_vpc, lab_tag):
     """List instance info for lab"""
 
-    reservations = conn.get_all_instances(filters = {'vpc-id': user_vpc.id,
-                                                     'tag:Lab': lab_tag})
+    reservations = conn.get_all_instances(filters={'vpc-id': user_vpc.id,
+                                                   'tag:Lab': lab_tag})
 
     final = []
-    for r in reservations:
-        for instance in r.instances:
-            final.append("""
+    tmpl = """
     Name:         {0}
       Lab:        {1}
       Region:     {2}
       IP:         {3}
       Private IP: {4}
-      Public DNS: {5}""".format(instance.tags['Name'],
-                                instance.tags['Lab'],
-                                str(instance.region).replace('RegionInfo:',''),
-                                instance.ip_address,
-                                instance.private_ip_address,
-                                instance.public_dns_name))
+      Public DNS: {5}"""
+    for r in reservations:
+        for instance in r.instances:
+            final.append(
+                tmpl.format(instance.tags['Name'],
+                            instance.tags['Lab'],
+                            str(instance.region).replace('RegionInfo:', ''),
+                            instance.ip_address,
+                            instance.private_ip_address,
+                            instance.public_dns_name))
     final.sort()
 
     return final
@@ -189,8 +262,9 @@ def launch_lab(conn, user_vpc, lab):
                     device[k] = int(raw_input('{0}: '.format(v.split(':')[1])))
 
     # connection and required info
-    security_groups = conn.get_all_security_groups(filters = {'vpc-id': user_vpc.id})
-    subnets = conn.get_all_subnets(filters = {'vpc-id': user_vpc.id})
+    security_groups = conn.get_all_security_groups(
+        filters={'vpc-id': user_vpc.id})
+    subnets = conn.get_all_subnets(filters={'vpc-id': user_vpc.id})
 
     # launch
     inst.launch_instances(conn, user_vpc, prompt[answer],
@@ -210,11 +284,13 @@ def terminate_lab(conn, user_vpc, lab_tag):
                 instance_ids.append(instance.id)
 
     conn.terminate_instances(instance_ids=instance_ids)
-
+    tmpl = '/host/{0}/users/{1}/{2}.txt'
     try:
         with open('/host/{0}/key-pairs.txt'.format(VPC)) as users:
             for user in users:
-                os.remove('/host/{0}/users/{1}/{2}.txt'.format(VPC, user.split('-')[0], lab_tag))
+                os.remove(tmpl.format(VPC,
+                                      user.split('-')[0],
+                                      lab_tag))
     except:
         print "No user files removed..."
 
