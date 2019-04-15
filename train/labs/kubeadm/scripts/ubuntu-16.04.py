@@ -44,7 +44,7 @@ def get_custom(prompt):
 
     return txt
 
-kube_version="1.13.3-00"
+kube_version="1.13"
 
 # prompts
 os.system('clear')
@@ -94,7 +94,7 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet={1} kubeadm={1} kubectl={1}
+apt-get install -y kubelet={1}* kubeadm={1}* kubectl={1}*
 apt-mark hold kubelet kubeadm kubectl
 
 {{dinfo}}
