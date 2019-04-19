@@ -50,8 +50,8 @@ kube_version="1.12"
 os.system('clear')
 
 txt = "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\n" + \
-    'echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial main" | tee /etc/apt/sources.list.d/docker.list\n' + \
-    'apt-get update && apt-get install -y docker.io\n'
+    'echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable" | tee /etc/apt/sources.list.d/docker.list\n' + \
+    'apt-get update && apt-get install -y docker-ce=18.06.3*\n'
 
 
 # instance configs
