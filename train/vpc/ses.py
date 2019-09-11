@@ -16,13 +16,15 @@ from util import check_email_template
 # TODO: Check for verified email address
 # TODO: Add option to verify an email address
 
-def prep_file(path, username):
+def prep_file(path, filename=None):
     """Configure email attachments"""
+    if not filename:
+        filename = os.path.basename(path)
 
     attachment = MIMEApplication(open(path, 'rb').read())
     attachment.add_header('Content-Disposition',
                           'attachment',
-                          filename='{0}.{1}'.format(username, path.split('.')[-1]))
+                          filename=filename)
 
     return(attachment)
 
@@ -56,14 +58,15 @@ def email_credentials():
             msg['To'] = line.split(',')[1].strip()
 
             # *.pem and *.ppk files
-            msg.attach(prep_file('/host/{0}/users/{1}/{1}-{0}.pem'.format(VPC, username), username))
-            msg.attach(prep_file('/host/{0}/users/{1}/{1}-{0}.ppk'.format(VPC, username), username))
+            msg.attach(prep_file('/host/{0}/users/{1}/{1}-{0}.pem'.format(VPC, username)))
+            msg.attach(prep_file('/host/{0}/users/{1}/{1}-{0}.ppk'.format(VPC, username)))
 
             # instance information
             mail_body += "\n---\n\nAWS instances:\n"
 
             files = [f for f in os.listdir('/host/{0}/users/{1}/'.format(VPC, username)) if f.endswith('.txt')]
             for textfile in files:
+                msg.attach(prep_file('/host/{0}/users/{1}/{2}.ssh_config'.format(VPC, username, textfile.split('.txt')[-2])))
                 with open('/host/{0}/users/{1}/{2}'.format(VPC, username, textfile)) as f:
                     for line in f:
                         if line.startswith('AWS'):

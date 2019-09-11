@@ -55,10 +55,6 @@ parser.add_argument('-n',
                     help='Generate ansible inventory',
                     action='store_true', required=False)
 
-parser.add_argument('-s', metavar='<user>',
-                    help='Generate ssh config',
-                    required=False)
-
 parser.add_argument('-d', metavar='<tag>',
                     help='Delete a lab from AWS',
                     required=False)
@@ -97,8 +93,6 @@ def process():
 
     if args.n:
         labs.inventory(conn, user_vpc)
-    if args.s:
-        labs.ssh_config(conn, user_vpc, args.s)
     if args.x:
         labs.launch_lab(conn, user_vpc, args.x)
     if args.r:

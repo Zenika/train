@@ -139,26 +139,23 @@ Name:         {0}
     return final
 
 
-def ssh_config_instance(instance, user):
-    if 'Name' not in instance.tags.keys():
-        return ""
-    name = instance.tags['Name']
-    node = "-".join(name.split("-")[1:])
-    tmpl = """
-Host {0}
-     HostName {1}
-     User ubuntu
-     IdentityFile /host/{2}/users/{3}/{3}-{2}.pem"""
-    return tmpl.format(node, instance.ip_address, VPC, user)
+def get_user_instance_ssh_config(conn, user_vpc, lab_tag, user):
+    """List SSH config for each instance for user"""
 
-
-def ssh_config(conn, user_vpc, user):
-    """Generate ssh_config for user"""
     reservations = conn.get_all_instances(filters={'vpc-id': user_vpc.id,
+                                                   'tag:Lab': lab_tag,
                                                    'tag:User': user})
+
+    final = []
     for r in reservations:
         for instance in r.instances:
-            print ssh_config_instance(instance, user)
+            final.append("""
+Host {0}
+    HostName {1}\n""".format("-".join(instance.tags['Name'].split("-")[1:]),
+                             instance.ip_address))
+    final.sort()
+
+    return final
 
 
 def instance_to_inventory(instance):
