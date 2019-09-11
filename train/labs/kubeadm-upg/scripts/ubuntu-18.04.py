@@ -44,18 +44,18 @@ def get_custom(prompt):
 
     return txt
 
-kube_version="1.13"
+kube_version="1.14"
 
 # prompts
 os.system('clear')
 
 txt = "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\n" + \
     'echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable" | tee /etc/apt/sources.list.d/docker.list\n' + \
-    'apt-get update && apt-get install -y docker-ce\n'
+    'apt-get update && apt-get install -y docker-ce=18.06.3*\n'
 
 
 # instance configs
-PRIMARY_OS = 'Ubuntu-16.04'
+PRIMARY_OS = 'Ubuntu-18.04'
 PRIMARY = '''#!/bin/sh
 
 FQDN="{{fqdn}}"
