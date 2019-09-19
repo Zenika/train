@@ -114,11 +114,19 @@ def output_user_files(conn, user_vpc, lab_tag):
                 os.makedirs('/host/{0}/users/{1}'.format(VPC, user))
 
             info = labs.get_user_instance_info(conn, user_vpc, lab_tag, user)
+            ssh_config = labs.get_user_instance_ssh_config(conn, user_vpc, lab_tag, user)
 
             with open('/host/{0}/users/{1}/{2}.txt'.format(VPC, user, lab_tag), 'w') as f:
                 f.write('AWS Instances:\n')
                 for i in info:
                     f.write(i)
+            with open('/host/{0}/users/{1}/{2}.ssh_config'.format(VPC, user, lab_tag), 'w') as f:
+                f.write('''Host *
+    User ubuntu
+    IdentityFile ./{0}-{1}.pem
+    StrictHostKeyChecking no\n'''.format(VPC, user))
+                for s in ssh_config:
+                    f.write(s)
 
 
 def get_vpc_instances(conn, vpc):
