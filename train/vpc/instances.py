@@ -123,7 +123,7 @@ def output_user_files(conn, user_vpc, lab_tag):
             with open('/host/{0}/users/{1}/{2}.ssh_config'.format(VPC, user, lab_tag), 'w') as f:
                 f.write('''Host *
     User ubuntu
-    IdentityFile ./{0}-{1}.pem
+    IdentityFile ./{1}-{0}.pem
     StrictHostKeyChecking no\n'''.format(VPC, user))
                 for s in ssh_config:
                     f.write(s)
